@@ -1,0 +1,17 @@
+{
+  "name": "monitor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "monitor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "benestangl",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.83.0"
+  },
+  "optionalDependencies": {
+    "aws-sdk": "^2.141.0"
+  }
+}

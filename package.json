@@ -1,0 +1,17 @@
+{
+  "name": "editget",
+  "version": "1.0.0",
+  "description": "",
+  "main": "editGet.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "benestangl",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.141.0"
+  },
+  "devDependencies": {
+    "claudia": "^2.14.3"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "editpost",
+  "version": "1.0.0",
+  "description": "",
+  "main": "editpost.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "benestangl",
+  "license": "ISC",
+  "optionalDependencies": {
+    "aws-sdk": "^2.141.0"
+  }
+}
