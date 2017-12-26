@@ -81,4 +81,8 @@ Sundays:
 0 6,12,18 ? * SUN *
 ```
 
-  
+On the side of the target, configure the input and set a Constant (JSON text):
+
+```
+{"queryStringParameters":{"secret":"your-secret-goes-here"}}
+```
