@@ -26,6 +26,7 @@ exports.handler = function (event, context, callback) {
       category = event.queryStringParameters.category;
       type = event.queryStringParameters.type;
       name = event.queryStringParameters.name;
+      if (event.queryStringParameters.threshold) threshold = event.queryStringParameters.threshold
       timestamp = new Date().toISOString();
       hash.update(host + category + type + name);
       id = hash.digest('hex');
