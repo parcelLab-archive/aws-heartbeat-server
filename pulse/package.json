@@ -10,5 +10,11 @@
   "license": "ISC",
   "optionalDependencies": {
     "aws-sdk": "^2.141.0"
+  },
+  "dependencies": {
+    "graphql": "^15.6.1",
+    "graphql-request": "^3.6.1",
+    "request": "^2.88.2",
+    "underscore": "^1.13.1"
   }
 }
