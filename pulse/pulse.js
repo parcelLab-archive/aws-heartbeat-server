@@ -75,14 +75,14 @@ exports.handler = function (event, context, callback) {
         thresholdHrs = parseInt(threshold)
         if (isNaN(thresholdHrs)) thresholdHrs = 24
       } catch {
-        console.log(`failed to convert thresholdHrs to int for ${type} - ${name} - ${category} - ${host}`)
+        console.log(`failed to convert thresholdHrs to int for ${type}-${name}-${category}-${host}`)
       }
 
       const ts = cache.get(`${type}-${name}-${category}-${host}`)
       if (ts && ts > new Date(new Date() - 15 * 60 * 1000)) {
         return
       } else {
-        cache.put(`${type} - ${name} - ${category} - ${host}`, new Date())
+        cache.put(`${type}-${name}-${category}-${host}`, new Date())
         try {
           const query = gql`
               mutation createHeartbeat ($name: String!,$category: String!,$host: String!,$type: String!,$thresholdHrs: Int!,$lastSuccessAt: DateTime!,$status: String! ){
@@ -119,7 +119,7 @@ exports.handler = function (event, context, callback) {
               console.log('error', 'pulseLegacyHeartbeatZelda', `Failed call createHeartbeat mutation - ${err}`)
             })
         } catch {
-          console.log(`failed to send to zelda for ${type} - ${name} - ${category} - ${host}`)
+          console.log(`failed to send to zelda for ${type}-${name}-${category}-${host}`)
         }
       }
       dynamodb.updateItem(params, function (err, data) {
