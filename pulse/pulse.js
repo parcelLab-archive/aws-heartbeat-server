@@ -76,7 +76,7 @@ exports.handler = function (event, context, callback) {
         console.log(`failed to convert thresholdHrs to int for ${type} - ${name} - ${category} - ${host}`)
       }
 
-      const cache = Cache(15 * 60 * 1000)
+      const cache = new Cache(15 * 60 * 1000)
       const ts = cache.get(`${type}-${name}-${category}-${host}`)
       if (ts && ts > new Date(new Date() - 15 * 60 * 1000)) {
         return
