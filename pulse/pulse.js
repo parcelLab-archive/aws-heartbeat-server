@@ -11,6 +11,8 @@ const graphQLClient = new GraphQLClient(graphQlUri, {
   }
 })
 
+const cache = new Cache(15 * 60 * 1000)
+
 exports.handler = function (event, context, callback) {
   const hash = crypto.createHash('sha256')
   let id
@@ -76,7 +78,6 @@ exports.handler = function (event, context, callback) {
         console.log(`failed to convert thresholdHrs to int for ${type} - ${name} - ${category} - ${host}`)
       }
 
-      const cache = new Cache(15 * 60 * 1000)
       const ts = cache.get(`${type}-${name}-${category}-${host}`)
       if (ts && ts > new Date(new Date() - 15 * 60 * 1000)) {
         return
@@ -118,7 +119,7 @@ exports.handler = function (event, context, callback) {
               console.log('error', 'pulseLegacyHeartbeatZelda', `Failed call createHeartbeat mutation - ${err}`)
             })
         } catch {
-          console.log('oops')
+          console.log(`failed to send to zelda for ${type} - ${name} - ${category} - ${host}`)
         }
       }
       dynamodb.updateItem(params, function (err, data) {
