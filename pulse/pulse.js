@@ -21,7 +21,7 @@ exports.handler = function (event, context, callback) {
   let type
   let name
   let timestamp
-  let threshold = '24' // default value - 24 hours
+  let threshold = '25' // default value - 24 hours
   let saturday = '0' // default value - exclude saturday
 
   if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
@@ -79,9 +79,7 @@ exports.handler = function (event, context, callback) {
       }
 
       const ts = cache.get(`${type}-${name}-${category}-${host}`)
-      if (ts && ts > new Date(new Date() - 15 * 60 * 1000)) {
-        return
-      } else {
+      if (!(ts && ts > new Date(new Date() - 15 * 60 * 1000))) {
         cache.put(`${type}-${name}-${category}-${host}`, new Date())
         try {
           const query = gql`
