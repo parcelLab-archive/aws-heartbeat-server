@@ -9,7 +9,11 @@
   "author": "benestangl",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.141.0"
+    "aws-sdk": "^2.141.0",
+    "graphql": "^15.6.1",
+    "graphql-request": "^3.6.1",
+    "request": "^2.88.2",
+    "underscore": "^1.13.1"
   },
   "devDependencies": {
     "claudia": "^2.14.3"

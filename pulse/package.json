@@ -9,9 +9,12 @@
   "author": "benestangl",
   "license": "ISC",
   "optionalDependencies": {
-    "aws-sdk": "^2.141.0"
+    "aws-sdk": "^2.1014.0"
   },
   "dependencies": {
+    "aws-xray-sdk": "^3.3.3",
+    "cache": "^2.3.1",
+    "crypto": "^1.0.1",
     "graphql": "^15.6.1",
     "graphql-request": "^3.6.1",
     "request": "^2.88.2",

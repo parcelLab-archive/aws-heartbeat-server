@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk')
 const dynamodb = new AWS.DynamoDB()
 const crypto = require('crypto')
+const Cache = require('cache')
 
 const { GraphQLClient, gql } = require('graphql-request')
 const graphQlUri = 'https://zelda.parcellab.com/graphql'
@@ -10,6 +11,8 @@ const graphQLClient = new GraphQLClient(graphQlUri, {
   }
 })
 
+const cache = new Cache(15 * 60 * 1000)
+
 exports.handler = function (event, context, callback) {
   const hash = crypto.createHash('sha256')
   let id
@@ -18,7 +21,7 @@ exports.handler = function (event, context, callback) {
   let type
   let name
   let timestamp
-  let threshold = '24' // default value - 24 hours
+  let threshold = '25' // default value - 25 hours
   let saturday = '0' // default value - exclude saturday
 
   if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
@@ -67,12 +70,60 @@ exports.handler = function (event, context, callback) {
         ReturnValues: 'ALL_NEW',
         TableName: 'Heartbeat'
       }
+      let thresholdHrs = 25
+      try {
+        thresholdHrs = parseInt(threshold)
+        if (isNaN(thresholdHrs)) thresholdHrs = 25
+      } catch {
+        console.log(`failed to convert thresholdHrs to int for ${type}-${name}-${category}-${host}`)
+      }
+
+      const ts = cache.get(`${type}-${name}-${category}-${host}`)
+      if (!(ts && ts > new Date(new Date() - 15 * 60 * 1000))) {
+        cache.put(`${type}-${name}-${category}-${host}`, new Date())
+        try {
+          const query = gql`
+            mutation createHeartbeat ($name: String!,$category: String!,$host: String!,$type: String!,$thresholdHrs: Int!,$lastSuccessAt: DateTime!,$status: String! ){
+            updateCreateHeartbeat(input: {name: $name, category: $category, hostName: $host, type: $type, thresholdHrs: $thresholdHrs, lastSuccessAt: $lastSuccessAt, status: $status}) {
+              id
+              name
+              type
+              category
+              hostName
+              customerId
+              snoozedUntil
+              thresholdHrs
+              errors {
+                field
+                messages
+              }
+            }
+            }
+          `
+          const variables = {
+            name: name,
+            category: category,
+            host: host,
+            type: type,
+            lastSuccessAt: new Date(Date.now()),
+            thresholdHrs: thresholdHrs,
+            status: 'closed'
+          }
+          graphQLClient.request(query, variables)
+            .then((data) => console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`))
+            .catch((err) => {
+              console.log('error', 'pulseLegacyHeartbeatZelda', `Failed call createHeartbeat mutation - ${err}`)
+            })
+        } catch {
+          console.log(`failed to send to zelda for ${type}-${name}-${category}-${host}`)
+        }
+      }
       dynamodb.updateItem(params, function (err, data) {
         if (err) {
           console.log(err, err.stack)
           callback({
             statusCode: err.statusCode,
-            body: 'Error: ' + err,
+            body: 'Error: ' + err
           })
         } else {
           callback(null, {
@@ -81,51 +132,6 @@ exports.handler = function (event, context, callback) {
           })
         }
       })
-      let thresholdHrs = 24
-      try {
-        thresholdHrs = parseInt(threshold)
-        if (isNaN(thresholdHrs)) thresholdHrs = 24
-      } catch {
-        console.log()
-      }
-      try {
-        const query = gql`
-      mutation createHeartbeat ($name: String!,$category: String!,$host: String!,$type: String!,$thresholdHrs: Int!,$lastSuccessAt: DateTime!,$status: String! ){
-        updateCreateHeartbeat(input: {name: $name, category: $category, hostName: $host, type: $type, thresholdHrs: $thresholdHrs, lastSuccessAt: $lastSuccessAt, status: $status}) {
-          legacyHeartbeat {
-            id
-            name
-            type
-            category
-            hostName
-            customer {
-              id
-              key
-            }
-            snoozed
-            snoozedUntil
-            thresholdHrs
-          }
-        }
-      }
-    `
-        const variables = {
-          name: name,
-          category: category,
-          host: host,
-          type: type,
-          lastSuccessAt: new Date(Date.now()),
-          thresholdHrs: thresholdHrs,
-          status: 'healthy'
-        }
-        graphQLClient.request(query, variables)
-          .then((data) => console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`))
-          .catch((err) => {
-            console.log('error', 'pulseLegacyHeartbeatZelda', `Failed call createHeartbeat mutation - ${err}`)
-          })
-      } catch {
-        console.log('oops')
-      }
     }
   }
 }
