@@ -21,7 +21,7 @@ exports.handler = function (event, context, callback) {
   let type
   let name
   let timestamp
-  let threshold = '25' // default value - 24 hours
+  let threshold = '25' // default value - 25 hours
   let saturday = '0' // default value - exclude saturday
 
   if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
@@ -70,10 +70,10 @@ exports.handler = function (event, context, callback) {
         ReturnValues: 'ALL_NEW',
         TableName: 'Heartbeat'
       }
-      let thresholdHrs = 24
+      let thresholdHrs = 25
       try {
         thresholdHrs = parseInt(threshold)
-        if (isNaN(thresholdHrs)) thresholdHrs = 24
+        if (isNaN(thresholdHrs)) thresholdHrs = 25
       } catch {
         console.log(`failed to convert thresholdHrs to int for ${type}-${name}-${category}-${host}`)
       }
@@ -83,25 +83,23 @@ exports.handler = function (event, context, callback) {
         cache.put(`${type}-${name}-${category}-${host}`, new Date())
         try {
           const query = gql`
-              mutation createHeartbeat ($name: String!,$category: String!,$host: String!,$type: String!,$thresholdHrs: Int!,$lastSuccessAt: DateTime!,$status: String! ){
-                updateCreateHeartbeat(input: {name: $name, category: $category, hostName: $host, type: $type, thresholdHrs: $thresholdHrs, lastSuccessAt: $lastSuccessAt, status: $status}) {
-                  legacyHeartbeat {
-                    id
-                    name
-                    type
-                    category
-                    hostName
-                    customer {
-                      id
-                      key
-                    }
-                    snoozed
-                    snoozedUntil
-                    thresholdHrs
-                  }
-                }
+            mutation createHeartbeat ($name: String!,$category: String!,$host: String!,$type: String!,$thresholdHrs: Int!,$lastSuccessAt: DateTime!,$status: String! ){
+            updateCreateHeartbeat(input: {name: $name, category: $category, hostName: $host, type: $type, thresholdHrs: $thresholdHrs, lastSuccessAt: $lastSuccessAt, status: $status}) {
+              id
+              name
+              type
+              category
+              hostName
+              customerId
+              snoozedUntil
+              thresholdHrs
+              errors {
+                field
+                messages
               }
-            `
+            }
+            }
+          `
           const variables = {
             name: name,
             category: category,
@@ -109,7 +107,7 @@ exports.handler = function (event, context, callback) {
             type: type,
             lastSuccessAt: new Date(Date.now()),
             thresholdHrs: thresholdHrs,
-            status: 'healthy'
+            status: 'closed'
           }
           graphQLClient.request(query, variables)
             .then((data) => console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`))
