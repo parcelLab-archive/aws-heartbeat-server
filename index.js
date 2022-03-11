@@ -1,4 +1,3 @@
-const crypto = require('crypto')
 const Cache = require('cache')
 
 const { GraphQLClient, gql } = require('graphql-request')
@@ -16,7 +15,6 @@ exports.handler = function (event, context, callback) {
   let category
   let type
   let name
-  let timestamp
   let threshold = '25' // default value - 25 hours
 
   if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
@@ -29,7 +27,6 @@ exports.handler = function (event, context, callback) {
       type = event.queryStringParameters.type
       name = event.queryStringParameters.name
       if (event.queryStringParameters.threshold) threshold = event.queryStringParameters.threshold
-      timestamp = new Date().toISOString()
       let thresholdHrs = 25
       try {
         thresholdHrs = parseInt(threshold)
