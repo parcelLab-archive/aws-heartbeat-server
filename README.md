@@ -12,7 +12,7 @@ It's possible to change the settings and get automatic notifications in case of 
 
 # What is the repo content?
 
-This repo contains AWS Lambda functions, instructions how to deploy them and how to setup the AWS API gateway. It contains 5 lambda functions:
+This repo contains the pulse Lambda, instructions how to deploy it.
 
 - `pulse` handles the pulse API calls from the aws-heartbeat-client, and creates a new Heartbeat in Zelda or updates an existing one — i.e. this one receives a heartbeat.
 
