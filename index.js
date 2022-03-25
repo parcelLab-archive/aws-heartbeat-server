@@ -31,8 +31,8 @@ exports.handler = function (event, context, callback) {
         cache.put(`${type}-${name}-${category}-${host}`, new Date())
         try {
           const query = gql`
-          mutation createHeartbeat($name: String!, $category: String!, $host: String!, $type: String!){
-            updateCreateHeartbeat(input: { hostName: $host, category: $category, type: $type, name: $name }) {
+          mutation createHeartbeat($name: String!, $category: String!, $host: String!, $type: String!,$lastSuccessAt: DateTime!){
+            updateCreateHeartbeat(input: { hostName: $host, category: $category, type: $type, name: $name ,lastSuccessAt: $lastSuccessAt}) {
           ... on LegacyHeartbeatType {
                 id
                 hostName
@@ -47,7 +47,8 @@ exports.handler = function (event, context, callback) {
             name: name,
             category: category,
             host: host,
-            type: type
+            type: type,
+            lastSuccessAt: new Date(Date.now()),
           }
           graphQLClient.request(query, variables)
             .then((data) => console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`))
