@@ -34,8 +34,8 @@ exports.handler = function (event, context, callback) {
         cache.put(`${type}-${name}-${category}-${host}`, new Date())
         try {
           const query = gql`
-          mutation createHeartbeat($name: String!, $category: String!, $host: String!, $type: String!,$lastSuccessAt: DateTime!, thresholdHrs: Int!){
-            updateCreateHeartbeat(input: { hostName: $host, category: $category, type: $type, name: $name ,lastSuccessAt: $lastSuccessAt, thresholdHrs: $thresholdHrs}) {
+          mutation createHeartbeat($name: String!, $category: String!, $host: String!, $type: String!,$lastSuccessAt: DateTime!, $thresholdHrs: Int!, $status: AlertStatus!){
+            updateCreateHeartbeat(input: { hostName: $host, category: $category, type: $type, name: $name ,lastSuccessAt: $lastSuccessAt, thresholdHrs: $thresholdHrs, status: $status}) {
           ... on LegacyHeartbeatType {
                 id
                 hostName
@@ -44,6 +44,7 @@ exports.handler = function (event, context, callback) {
                 name
                 lastSuccessAt
                 thresholdHrs
+                status
               }
             }
           }
@@ -54,7 +55,8 @@ exports.handler = function (event, context, callback) {
             host: host,
             type: type,
             lastSuccessAt: new Date(Date.now()),
-            thresholdHrs: thresholdHrs
+            thresholdHrs: thresholdHrs,
+            status: "CLOSED"
           }
           graphQLClient.request(query, variables)
             .then((data) => console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`))
