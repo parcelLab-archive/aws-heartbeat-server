@@ -39,6 +39,7 @@ exports.handler = function (event, context, callback) {
                 category
                 type
                 name
+                lastSuccessAt
               }
             }
           }
