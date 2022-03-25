@@ -25,20 +25,26 @@ exports.handler = function (event, context, callback) {
       category = event.queryStringParameters.category
       type = event.queryStringParameters.type
       name = event.queryStringParameters.name
-
+      thresholdHrs = 25
+      if (category === "manfred") {
+        thresholdHrs = 0
+      }
       const ts = cache.get(`${type}-${name}-${category}-${host}`)
       if (!(ts && ts > new Date(new Date() - 15 * 60 * 1000))) {
         cache.put(`${type}-${name}-${category}-${host}`, new Date())
         try {
           const query = gql`
-          mutation createHeartbeat($name: String!, $category: String!, $host: String!, $type: String!){
-            updateCreateHeartbeat(input: { hostName: $host, category: $category, type: $type, name: $name }) {
+          mutation createHeartbeat($name: String!, $category: String!, $host: String!, $type: String!,$lastSuccessAt: DateTime!, $thresholdHrs: Int!, $status: AlertStatus!){
+            updateCreateHeartbeat(input: { hostName: $host, category: $category, type: $type, name: $name ,lastSuccessAt: $lastSuccessAt, thresholdHrs: $thresholdHrs, status: $status}) {
           ... on LegacyHeartbeatType {
                 id
                 hostName
                 category
                 type
                 name
+                lastSuccessAt
+                thresholdHrs
+                status
               }
             }
           }
@@ -47,7 +53,10 @@ exports.handler = function (event, context, callback) {
             name: name,
             category: category,
             host: host,
-            type: type
+            type: type,
+            lastSuccessAt: new Date(Date.now()),
+            thresholdHrs: thresholdHrs,
+            status: "CLOSED"
           }
           graphQLClient.request(query, variables)
             .then((data) => console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`))
