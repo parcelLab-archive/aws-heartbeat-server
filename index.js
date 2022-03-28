@@ -15,7 +15,7 @@ exports.handler = function (event, context, callback) {
   let category
   let type
   let name
-
+  let thresholdHrs
   if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
     if (event.queryStringParameters.host &&
       event.queryStringParameters.category &&
