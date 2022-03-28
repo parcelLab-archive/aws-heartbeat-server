@@ -15,6 +15,7 @@ exports.handler = function (event, context, callback) {
   let category
   let type
   let name
+  let thresholdHrs
 
   if (event.queryStringParameters !== null && event.queryStringParameters !== undefined) {
     if (event.queryStringParameters.host &&
@@ -59,14 +60,29 @@ exports.handler = function (event, context, callback) {
             status: "CLOSED"
           }
           graphQLClient.request(query, variables)
-            .then((data) => console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`))
+            .then((data) => {
+              console.log('debug', 'pulseLegacyHeartbeatZelda', `Zelda replied with: ${JSON.stringify(data)}`)
+              callback(null, {
+                statusCode: 200,
+                body: 'Successful Heartbeat'
+              })
+            })
             .catch((err) => {
               console.log('error', 'pulseLegacyHeartbeatZelda', `Failed call createHeartbeat mutation - ${err}`)
+              callback(null, {
+                statusCode: err.statusCode,
+                body: 'error' + `Failed call createHeartbeat mutation - ${err}`
+              })
             })
         } catch {
           console.log(`failed to send to zelda for ${type}-${name}-${category}-${host}`)
+          callback(null, {
+            statusCode: 500,
+            body: 'error' + `Failed call createHeartbeat mutation - ${err}`
+          })
         }
       }
     }
   }
+  return
 }
